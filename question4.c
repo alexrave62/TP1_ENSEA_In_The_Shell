@@ -13,45 +13,62 @@
 #define PROMPT "enseash % "
 #define GOODBYE "Bye Bye ...\n"
 #define BUFSIZE 200
-#define ENSEA 
+
 
 int main (){
-	//Message d'accueil
+    
+    //Initialisation of variables
+    char buf[BUFSIZE];
+    int status;
+    pid_t ret;
+    ssize_t len_com;
+    pid_t wpid;
+    char info[BUFSIZE];
+
+    //Welcoming message
 	write(STDOUT_FILENO,WELCOME,strlen(WELCOME));
 	write(STDOUT_FILENO,PROMPT,strlen(PROMPT));
-	// boucle de commande
-	char buf[BUFSIZE];
+
+    // Command loop
 	while (1){
-		//Réinitialization of the buffer
+
+        //Buffer reset
 		for (int i=0; i<BUFSIZE; i++){buf[i]='\0';}
 		
-		//lecture commande
-		ssize_t len_com = read(STDIN_FILENO, buf, BUFSIZE);	
+		//Command reading
+		len_com = read(STDIN_FILENO, buf, BUFSIZE);	
 		if (len_com < 0){return EXIT_FAILURE;}				//error test
-		if (len_com == 0){return EXIT_FAILURE;}				//pas de commande
+		if (len_com == 0){return EXIT_FAILURE;}				//no command
 		buf[len_com-1] = '\0';					
 		
-		//Evaluation commande
-		int status;
-		pid_t ret = fork();
+		//Commande evaluation
+		ret = fork();
 		if (ret==-1){exit(EXIT_FAILURE);}					//error test
-		if (ret !=0) {                                      //parent
-			if (strcmp(buf,"exit")==0){						//exit if 'exit' command
+        
+        //parent
+		if (ret !=0) {           
+
+            //exit if 'exit' command                           
+			if (strcmp(buf,"exit")==0){						
 				write(STDOUT_FILENO,GOODBYE,strlen(GOODBYE));
 				exit(EXIT_SUCCESS);}
-			pid_t wpid = waitpid(ret,&status,0);
+			wpid = waitpid(ret,&status,0);
+
+            // Return of exit or signal code
             if (wpid == -1) {exit(EXIT_FAILURE);}
             if (WIFEXITED(status)) {
-                printf("enseash [exit:%d] %\n", WEXITSTATUS(status));
+				sprintf(info,"enseash [exit:%d] %% ",WEXITSTATUS(status));
                 } 
             else if (WIFSIGNALED(status)) {
-                printf("enseash [sign:%d] %\n", WTERMSIG(status));}
+				sprintf(info,"enseash [sign:%d] %% ",WTERMSIG(status));
+            }
+            write(STDOUT_FILENO,info,strlen(info));
         }
-		else {                                              //child
+
+        //child
+		else {                                              
 			execlp(buf,buf, (char *)NULL);
 			exit(EXIT_SUCCESS);}
-		
-		write(1,PROMPT,strlen(PROMPT));
 	}
 	return 0;
  }
