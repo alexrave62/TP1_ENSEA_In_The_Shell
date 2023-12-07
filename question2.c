@@ -13,12 +13,20 @@
 #define BUFSIZE 200
 
 int main (){
-	//Message d'accueil
+	
+    //Initialisation des variables
+    char buf[BUFSIZE];
+    int status;
+    pid_t ret;
+
+    //Message d'accueil
 	write(STDOUT_FILENO,WELCOME,strlen(WELCOME));
 	write(STDOUT_FILENO,PROMPT,strlen(PROMPT));
-	// boucle de commande
-	char buf[BUFSIZE];
+	
+    
+    // boucle de commande
 	while (1){
+
 		//Réinitialization of the buffer
 		for (int i=0; i<BUFSIZE; i++){buf[i]='\0';}
 		
@@ -27,17 +35,20 @@ int main (){
 		if (len_com < 0){return EXIT_FAILURE;}				//error test
 		buf[len_com-1] = '\0';					
 		if (len_com == 0){return EXIT_FAILURE;}				//pas de commande ou ctrl+d
-		//Evaluation commande
-		int status;
-		pid_t ret = fork();
+		
+        //Evaluation commande
+		ret = fork();
 		if (ret==-1){exit(EXIT_FAILURE);}					//error test
-		if (ret !=0) {
-			waitpid(ret,&status,0);}
+		
+        //parent
+        if (ret !=0) {
+			waitpid(ret,&status,0);
+            write(1,PROMPT,strlen(PROMPT));}
+        
+        //enfant
 		else {
 			execlp(buf,buf, (char *)NULL);
 			exit(EXIT_SUCCESS);}
-		
-		write(1,PROMPT,strlen(PROMPT));
 	}
 	return 0;
  }
