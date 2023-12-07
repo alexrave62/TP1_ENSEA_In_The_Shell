@@ -39,10 +39,10 @@ int main (){
 		for (int i=0; i<BUFSIZE; i++){buf[i]='\0';args[i]='\0';}
         arg_count=0;	
 
-		//Complex command reading
-		len_com = read(STDIN_FILENO, buf, BUFSIZE);	
-		if (len_com < 0){return EXIT_FAILURE;}				//error test
-		if (len_com == 0){return EXIT_FAILURE;}				//no command
+	//Complex command reading
+	len_com = read(STDIN_FILENO, buf, BUFSIZE);	
+	if (len_com < 0){return EXIT_FAILURE;}				//error test
+	if (len_com == 0){return EXIT_FAILURE;}				//no command
         
         //Resizing for execution
         buf[len_com-1] = '\0';              
